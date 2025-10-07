@@ -21,14 +21,14 @@ export function getPetfinderClient() {
 
 export async function searchAnimals(params = {}) {
   const client = getPetfinderClient();
-  if (!client) throw new Error("Petfinder credentials not configured.");
+  if (!client) throw new Error("Petfinder credentials are not configured.");
   const res = await client.animal.search(params);
   return res.data; // { animals: [], pagination: {...} }
 }
 
 export async function getAnimalById(id) {
   const client = getPetfinderClient();
-  if (!client) throw new Error("Petfinder credentials not configured.");
+  if (!client) throw new Error("Petfinder credentials are not configured.");
   const res = await client.animal.show(id);
   return res.data; // { animal: {...} }
 }

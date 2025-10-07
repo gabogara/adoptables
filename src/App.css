@@ -33,3 +33,12 @@ nav a.active {
   text-decoration: underline;
   font-weight: bold;
 }
+
+form label {
+  font-weight: 600;
+}
+form input,
+form select,
+form button {
+  padding: 6px 8px;
+}

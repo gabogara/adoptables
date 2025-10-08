@@ -7,11 +7,13 @@ import DetailsPage from "./pages/DetailsPage.jsx";
 import FavoritesPage from "./pages/FavoritesPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
+import { FavoritesProvider } from "./features/favorites/FavoritesContext.jsx";
 
 export default function App() {
   return (
-    <>
+    <FavoritesProvider>
       <NavBar>
+        {/* children prop to meet the "component that takes children" requirement */}
         <NavLink
           to="/"
           end
@@ -49,6 +51,6 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
-    </>
+    </FavoritesProvider>
   );
 }

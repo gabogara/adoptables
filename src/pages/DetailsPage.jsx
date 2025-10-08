@@ -4,14 +4,16 @@ import Loader from "../shared/Loader.jsx";
 import ErrorAlert from "../shared/ErrorAlert.jsx";
 import { getAnimalById } from "../shared/api/petfinder.js";
 import { useFavoritesContext } from "../features/favorites/FavoritesContext.jsx";
+import { useRecentlyViewed } from "../features/recentlyViewed/useRecentlyViewed.js";
 
 export default function DetailsPage() {
   const { id } = useParams();
   const numericId = Number.parseInt(id, 10);
   const [animal, setAnimal] = React.useState(null);
-  const [status, setStatus] = React.useState("idle"); // idle|loading|ready|error
+  const [status, setStatus] = React.useState("idle");
   const [error, setError] = React.useState("");
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesContext();
+  const { addViewed } = useRecentlyViewed();
 
   React.useEffect(() => {
     let mounted = true;
@@ -21,8 +23,10 @@ export default function DetailsPage() {
       try {
         const data = await getAnimalById(numericId);
         if (!mounted) return;
-        setAnimal(data?.animal || null);
+        const a = data?.animal || null;
+        setAnimal(a);
         setStatus("ready");
+        if (a) addViewed(a);
       } catch (e) {
         if (!mounted) return;
         console.error(e);
@@ -41,7 +45,7 @@ export default function DetailsPage() {
     return () => {
       mounted = false;
     };
-  }, [numericId]);
+  }, [numericId, addViewed]);
 
   if (status === "loading") {
     return (

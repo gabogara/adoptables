@@ -2,11 +2,13 @@ import React from "react";
 import Loader from "../shared/Loader.jsx";
 import ErrorAlert from "../shared/ErrorAlert.jsx";
 import { searchAnimals } from "../shared/api/petfinder.js";
+import { useRecentlyViewed } from "../features/recentlyViewed/useRecentlyViewed.js";
 
 export default function HomePage() {
   const [animals, setAnimals] = React.useState([]);
   const [status, setStatus] = React.useState("idle"); // idle|loading|ready|error
   const [error, setError] = React.useState("");
+  const { recent, clearRecent } = useRecentlyViewed();
 
   React.useEffect(() => {
     let mounted = true;
@@ -57,6 +59,26 @@ export default function HomePage() {
             </li>
           ))}
         </ul>
+      )}
+
+      <hr style={{ margin: "24px 0" }} />
+
+      <h3>Recently viewed</h3>
+      {recent.length === 0 ? (
+        <p>No recently viewed pets yet.</p>
+      ) : (
+        <>
+          <ul>
+            {recent.map((r) => (
+              <li key={r.id}>
+                <strong>{r.name}</strong> — {r.type}
+                {r.city ? ` • ${r.city}` : ""}
+                {r.state ? `, ${r.state}` : ""}
+              </li>
+            ))}
+          </ul>
+          <button onClick={clearRecent}>Clear</button>
+        </>
       )}
     </>
   );

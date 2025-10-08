@@ -1,3 +1,4 @@
+// src/pages/DetailsPage.jsx
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import Loader from "../shared/Loader.jsx";
@@ -9,9 +10,11 @@ import { useRecentlyViewed } from "../features/recentlyViewed/useRecentlyViewed.
 export default function DetailsPage() {
   const { id } = useParams();
   const numericId = Number.parseInt(id, 10);
+
   const [animal, setAnimal] = React.useState(null);
-  const [status, setStatus] = React.useState("idle");
+  const [status, setStatus] = React.useState("idle"); // idle|loading|ready|error
   const [error, setError] = React.useState("");
+
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesContext();
   const { addViewed } = useRecentlyViewed();
 
@@ -26,7 +29,7 @@ export default function DetailsPage() {
         const a = data?.animal || null;
         setAnimal(a);
         setStatus("ready");
-        if (a) addViewed(a);
+        if (a) addViewed(a); // Record as recently viewed AFTER successful fetch
       } catch (e) {
         if (!mounted) return;
         console.error(e);
@@ -36,15 +39,14 @@ export default function DetailsPage() {
         setStatus("error");
       }
     }
-    if (Number.isFinite(numericId)) {
-      load();
-    } else {
+    if (Number.isFinite(numericId)) load();
+    else {
       setError("Invalid id.");
       setStatus("error");
     }
     return () => {
       mounted = false;
-    };
+    }; // Cleanup to avoid setting state after unmount
   }, [numericId, addViewed]);
 
   if (status === "loading") {
@@ -82,24 +84,23 @@ export default function DetailsPage() {
 
   const photo =
     animal.photos?.[0]?.medium || animal.primary_photo_cropped?.medium || "";
-
   const location = [
     animal.contact?.address?.city || "",
     animal.contact?.address?.state || "",
   ]
     .filter(Boolean)
     .join(", ");
-
   const favorite = isFavorite(animal.id);
 
   return (
     <>
       <h2>{animal.name || "Unnamed"}</h2>
+
       {photo ? (
         <img
           src={photo}
           alt={`${animal.name || "Pet"} photo`}
-          style={{ maxWidth: "320px", display: "block", marginBottom: 12 }}
+          style={{ maxWidth: 320, display: "block", marginBottom: 12 }}
         />
       ) : (
         <p>No photo available.</p>
@@ -131,12 +132,11 @@ export default function DetailsPage() {
         )}
       </ul>
 
-      {!favorite && (
+      {!favorite ? (
         <button onClick={() => addFavorite(animal)} style={{ marginRight: 8 }}>
           Add to Favorites
         </button>
-      )}
-      {favorite && (
+      ) : (
         <button
           onClick={() => removeFavorite(animal.id)}
           style={{ marginRight: 8 }}

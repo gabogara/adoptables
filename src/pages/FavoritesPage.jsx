@@ -9,29 +9,25 @@ export default function FavoritesPage() {
 
   const [editingId, setEditingId] = React.useState(null);
   const [noteDraft, setNoteDraft] = React.useState("");
-  const [confirmId, setConfirmId] = React.useState(null); // id to delete
+  const [confirmId, setConfirmId] = React.useState(null);
 
   function startEdit(fav) {
     setEditingId(fav.id);
     setNoteDraft(fav.note || "");
   }
-
   function cancelEdit() {
     setEditingId(null);
     setNoteDraft("");
   }
-
   function saveEdit() {
     if (editingId == null) return;
     updateFavoriteNote(editingId, noteDraft);
     setEditingId(null);
     setNoteDraft("");
   }
-
   function askDelete(id) {
     setConfirmId(id);
   }
-
   function confirmDelete() {
     if (confirmId != null) {
       removeFavorite(confirmId);

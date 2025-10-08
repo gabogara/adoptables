@@ -1,4 +1,6 @@
+// src/pages/HomePage.jsx
 import React from "react";
+import { Link } from "react-router-dom"; // <-- add this
 import Loader from "../shared/Loader.jsx";
 import ErrorAlert from "../shared/ErrorAlert.jsx";
 import { searchAnimals } from "../shared/api/petfinder.js";
@@ -38,7 +40,7 @@ export default function HomePage() {
     load();
     return () => {
       mounted = false;
-    }; // cleanup
+    }; // Cleanup
   }, []);
 
   return (
@@ -54,8 +56,11 @@ export default function HomePage() {
         <ul>
           {animals.map((a) => (
             <li key={a.id}>
-              <strong>{a.name || "Unnamed"}</strong> — {a.type} · {a.age} ·{" "}
-              {a.gender}
+              {/* Link to details; DetailsPage calls addViewed(a) */}
+              <Link to={`/details/${a.id}`}>
+                <strong>{a.name || "Unnamed"}</strong>
+              </Link>{" "}
+              — {a.type} · {a.age} · {a.gender}
             </li>
           ))}
         </ul>

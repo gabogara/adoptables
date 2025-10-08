@@ -5,6 +5,7 @@ const MAX_ITEMS = 10;
 
 export function useRecentlyViewed() {
   const [recent, setRecent] = React.useState([]);
+  const loadedRef = React.useRef(false);
 
   React.useEffect(() => {
     try {
@@ -18,6 +19,10 @@ export function useRecentlyViewed() {
   }, []);
 
   React.useEffect(() => {
+    if (!loadedRef.current) {
+      loadedRef.current = true;
+      return;
+    }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(recent));
     } catch (e) {
@@ -37,9 +42,7 @@ export function useRecentlyViewed() {
       }
     }
     window.addEventListener("storage", onStorage);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-    };
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const addViewed = React.useCallback((animal) => {
@@ -56,8 +59,7 @@ export function useRecentlyViewed() {
     };
     setRecent((prev) => {
       const filtered = prev.filter((r) => r.id !== item.id);
-      const next = [item, ...filtered].slice(0, MAX_ITEMS);
-      return next;
+      return [item, ...filtered].slice(0, MAX_ITEMS);
     });
   }, []);
 

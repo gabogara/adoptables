@@ -13,7 +13,7 @@ export default function App() {
   return (
     <FavoritesProvider>
       <NavBar>
-        {/* children prop to meet the "component that takes children" requirement */}
+        {/* children prop to meet the "takes children" requirement */}
         <NavLink
           to="/"
           end

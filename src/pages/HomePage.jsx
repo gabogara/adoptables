@@ -1,6 +1,5 @@
-// src/pages/HomePage.jsx
 import React from "react";
-import { Link } from "react-router-dom"; // <-- add this
+import { Link } from "react-router-dom";
 import Loader from "../shared/Loader.jsx";
 import ErrorAlert from "../shared/ErrorAlert.jsx";
 import { searchAnimals } from "../shared/api/petfinder.js";
@@ -8,7 +7,7 @@ import { useRecentlyViewed } from "../features/recentlyViewed/useRecentlyViewed.
 
 export default function HomePage() {
   const [animals, setAnimals] = React.useState([]);
-  const [status, setStatus] = React.useState("idle"); // idle|loading|ready|error
+  const [status, setStatus] = React.useState("idle");
   const [error, setError] = React.useState("");
   const { recent, clearRecent } = useRecentlyViewed();
 
@@ -18,7 +17,6 @@ export default function HomePage() {
       setStatus("loading");
       setError("");
       try {
-        // Simple first search: dogs near San Francisco (94103)
         const data = await searchAnimals({
           type: "dog",
           location: "94103",
@@ -40,7 +38,7 @@ export default function HomePage() {
     load();
     return () => {
       mounted = false;
-    }; // Cleanup
+    };
   }, []);
 
   return (

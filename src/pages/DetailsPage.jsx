@@ -1,6 +1,5 @@
-// src/pages/DetailsPage.jsx
 import React from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import Loader from "../shared/Loader.jsx";
 import ErrorAlert from "../shared/ErrorAlert.jsx";
 import { getAnimalById } from "../shared/api/petfinder.js";
@@ -9,10 +8,12 @@ import { useRecentlyViewed } from "../features/recentlyViewed/useRecentlyViewed.
 
 export default function DetailsPage() {
   const { id } = useParams();
+  const locationRouter = useLocation();
+  const backTo = locationRouter.state?.from || "/search";
   const numericId = Number.parseInt(id, 10);
 
   const [animal, setAnimal] = React.useState(null);
-  const [status, setStatus] = React.useState("idle"); // idle|loading|ready|error
+  const [status, setStatus] = React.useState("idle");
   const [error, setError] = React.useState("");
 
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesContext();
@@ -29,7 +30,7 @@ export default function DetailsPage() {
         const a = data?.animal || null;
         setAnimal(a);
         setStatus("ready");
-        if (a) addViewed(a); // Record as recently viewed AFTER successful fetch
+        if (a) addViewed(a);
       } catch (e) {
         if (!mounted) return;
         console.error(e);
@@ -46,7 +47,7 @@ export default function DetailsPage() {
     }
     return () => {
       mounted = false;
-    }; // Cleanup to avoid setting state after unmount
+    };
   }, [numericId, addViewed]);
 
   if (status === "loading") {
@@ -64,8 +65,9 @@ export default function DetailsPage() {
         <h2>Details</h2>
         <ErrorAlert message={error} />
         <p>
-          <Link to="/search">Back to Search</Link>
-        </p>
+          <Link to={backTo}>Back to Search</Link>
+        </p>{" "}
+        {/* <-- use backTo */}
       </>
     );
   }
@@ -76,8 +78,9 @@ export default function DetailsPage() {
         <h2>Details</h2>
         <p>No details found.</p>
         <p>
-          <Link to="/search">Back to Search</Link>
-        </p>
+          <Link to={backTo}>Back to Search</Link>
+        </p>{" "}
+        {/* <-- use backTo */}
       </>
     );
   }
@@ -95,7 +98,6 @@ export default function DetailsPage() {
   return (
     <>
       <h2>{animal.name || "Unnamed"}</h2>
-
       {photo ? (
         <img
           src={photo}
@@ -105,7 +107,6 @@ export default function DetailsPage() {
       ) : (
         <p>No photo available.</p>
       )}
-
       <ul>
         <li>
           <strong>Type:</strong> {animal.type}
@@ -131,7 +132,6 @@ export default function DetailsPage() {
           </li>
         )}
       </ul>
-
       {!favorite ? (
         <button onClick={() => addFavorite(animal)} style={{ marginRight: 8 }}>
           Add to Favorites
@@ -144,8 +144,7 @@ export default function DetailsPage() {
           Remove from Favorites
         </button>
       )}
-
-      <Link to="/search">Back to Search</Link>
+      <Link to={backTo}>Back to Search</Link>
     </>
   );
 }

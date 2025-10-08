@@ -42,3 +42,11 @@ form select,
 form button {
   padding: 6px 8px;
 }
+a:focus,
+button:focus,
+select:focus,
+input:focus,
+textarea:focus {
+  outline: 2px solid #333;
+  outline-offset: 2px;
+}

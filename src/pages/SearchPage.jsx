@@ -4,6 +4,7 @@ import Loader from "../shared/Loader.jsx";
 import ErrorAlert from "../shared/ErrorAlert.jsx";
 import { searchAnimals } from "../shared/api/petfinder.js";
 import { isZip5 } from "../shared/utils.js";
+import Pagination from "../shared/Pagination.jsx";
 
 const TYPES = [
   "dog",
@@ -17,30 +18,22 @@ const TYPES = [
 ];
 
 export default function SearchPage() {
-  // form state (controlled)
   const [type, setType] = React.useState("dog");
-  const [location, setLocation] = React.useState(""); // 5-digit ZIP (optional but validated if filled)
+  const [location, setLocation] = React.useState("");
   const [limit, setLimit] = React.useState("12");
 
-  // data state
   const [animals, setAnimals] = React.useState([]);
-  const [pagination, setPagination] = React.useState(null); // { current_page, total_pages, ... }
+  const [pagination, setPagination] = React.useState(null);
   const [page, setPage] = React.useState(1);
 
-  // ui state
-  const [status, setStatus] = React.useState("idle"); // idle|loading|ready|error
+  const [status, setStatus] = React.useState("idle");
   const [error, setError] = React.useState("");
-  const [formError, setFormError] = React.useState(""); // validation message
+  const [formError, setFormError] = React.useState("");
 
-  // Build Petfinder query params (memoized)
   const buildParams = React.useCallback(() => {
-    const params = {
-      type,
-      page,
-      limit: Number.parseInt(limit, 10) || 12,
-    };
+    const params = { type, page, limit: Number.parseInt(limit, 10) || 12 };
     const loc = location.trim();
-    if (loc) params.location = loc; // Only send if provided
+    if (loc) params.location = loc;
     return params;
   }, [type, location, page, limit]);
 
@@ -49,7 +42,7 @@ export default function SearchPage() {
     setError("");
     try {
       const params = buildParams();
-      params.page = targetPage; // ensure we use the latest page
+      params.page = targetPage;
       const data = await searchAnimals(params);
       setAnimals(Array.isArray(data?.animals) ? data.animals : []);
       setPagination(data?.pagination || null);
@@ -65,7 +58,7 @@ export default function SearchPage() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    // Basic validation: type required, location if present must be ZIP5
+
     if (!type) {
       setFormError("Please select a type.");
       return;
@@ -95,11 +88,6 @@ export default function SearchPage() {
     setPage(next);
     fetchAnimals(next);
   }
-
-  const disabledPrev = !pagination || (pagination?.current_page || 1) <= 1;
-  const disabledNext =
-    !pagination ||
-    (pagination?.current_page || 1) >= (pagination?.total_pages || 1);
 
   return (
     <>
@@ -174,6 +162,7 @@ export default function SearchPage() {
             Showing page <strong>{pagination?.current_page || page}</strong> of{" "}
             <strong>{pagination?.total_pages || "?"}</strong>
           </p>
+
           <ul>
             {animals.map((a) => (
               <li key={a.id} style={{ marginBottom: 8 }}>
@@ -190,14 +179,12 @@ export default function SearchPage() {
             ))}
           </ul>
 
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={handlePrev} disabled={disabledPrev}>
-              Prev
-            </button>
-            <button onClick={handleNext} disabled={disabledNext}>
-              Next
-            </button>
-          </div>
+          <Pagination
+            current={pagination?.current_page || page}
+            total={pagination?.total_pages || 1}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
         </>
       )}
     </>

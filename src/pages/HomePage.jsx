@@ -1,5 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import PetCard from "../shared/PetCard.jsx";
+import list from "../shared/List.module.css";
 import Loader from "../shared/Loader.jsx";
 import ErrorAlert from "../shared/ErrorAlert.jsx";
 import { searchAnimals } from "../shared/api/petfinder.js";
@@ -17,6 +18,7 @@ export default function HomePage() {
       setStatus("loading");
       setError("");
       try {
+        // Simple first search: dogs near San Francisco (94103)
         const data = await searchAnimals({
           type: "dog",
           location: "94103",
@@ -48,20 +50,18 @@ export default function HomePage() {
 
       {status === "loading" && <Loader text="Loading pets..." />}
       {status === "error" && <ErrorAlert message={error} />}
+
       {status === "ready" && animals.length === 0 && <p>No results.</p>}
 
       {status === "ready" && animals.length > 0 && (
-        <ul>
-          {animals.map((a) => (
-            <li key={a.id}>
-              {/* Link to details; DetailsPage calls addViewed(a) */}
-              <Link to={`/details/${a.id}`}>
-                <strong>{a.name || "Unnamed"}</strong>
-              </Link>{" "}
-              — {a.type} · {a.age} · {a.gender}
-            </li>
-          ))}
-        </ul>
+        <>
+          <h3>Featured near 94103</h3>
+          <ul className={list.list}>
+            {animals.map((a) => (
+              <PetCard key={a.id} animal={a} to={`/details/${a.id}`} />
+            ))}
+          </ul>
+        </>
       )}
 
       <hr style={{ margin: "24px 0" }} />
@@ -71,16 +71,24 @@ export default function HomePage() {
         <p>No recently viewed pets yet.</p>
       ) : (
         <>
-          <ul>
-            {recent.map((r) => (
-              <li key={r.id}>
-                <strong>{r.name}</strong> — {r.type}
-                {r.city ? ` • ${r.city}` : ""}
-                {r.state ? `, ${r.state}` : ""}
-              </li>
-            ))}
+          <ul className={list.list}>
+            {recent.map((r) => {
+              const shaped = {
+                id: r.id,
+                name: r.name,
+                type: r.type,
+                photos: r.photo ? [{ small: r.photo, medium: r.photo }] : [],
+                contact: { address: { city: r.city, state: r.state } },
+                breeds: { primary: "" },
+              };
+              return (
+                <PetCard key={r.id} animal={shaped} to={`/details/${r.id}`} />
+              );
+            })}
           </ul>
-          <button onClick={clearRecent}>Clear</button>
+          <button type="button" onClick={clearRecent}>
+            Clear
+          </button>
         </>
       )}
     </>

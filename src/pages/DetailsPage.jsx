@@ -67,7 +67,6 @@ export default function DetailsPage() {
         <p>
           <Link to={backTo}>Back to Search</Link>
         </p>{" "}
-        {/* <-- use backTo */}
       </>
     );
   }
@@ -80,7 +79,6 @@ export default function DetailsPage() {
         <p>
           <Link to={backTo}>Back to Search</Link>
         </p>{" "}
-        {/* <-- use backTo */}
       </>
     );
   }

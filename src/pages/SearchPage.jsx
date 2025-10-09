@@ -1,5 +1,7 @@
 import React from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import PetCard from "../shared/PetCard.jsx";
+import list from "../shared/List.module.css";
+import { useSearchParams } from "react-router-dom";
 import Loader from "../shared/Loader.jsx";
 import ErrorAlert from "../shared/ErrorAlert.jsx";
 import { searchAnimals } from "../shared/api/petfinder.js";
@@ -203,22 +205,14 @@ export default function SearchPage() {
             <strong>{pagination?.total_pages || "?"}</strong>
           </p>
 
-          <ul>
+          <ul className={list.list}>
             {animals.map((a) => (
-              <li key={a.id} style={{ marginBottom: 8 }}>
-                <Link
-                  to={`/details/${a.id}`}
-                  state={{ from: `/search?${searchParams.toString()}` }}
-                >
-                  <strong>{a.name || "Unnamed"}</strong>
-                </Link>{" "}
-                — {a.type}
-                {a.breeds?.primary ? ` • ${a.breeds.primary}` : ""}{" "}
-                {a.contact?.address?.city ? ` • ${a.contact.address.city}` : ""}
-                {a.contact?.address?.state
-                  ? `, ${a.contact.address.state}`
-                  : ""}
-              </li>
+              <PetCard
+                key={a.id}
+                animal={a}
+                to={`/details/${a.id}`}
+                backState={{ from: `/search?${searchParams.toString()}` }}
+              />
             ))}
           </ul>
 

@@ -2,7 +2,14 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styles from "./List.module.css";
 
-export default function PetCard({ animal, to, backState, children }) {
+export default function PetCard({
+  animal,
+  to,
+  backState,
+  favorite = false,
+  onToggleFavorite,
+  children,
+}) {
   const name = animal?.name || "Unnamed";
   const type = animal?.type || "";
   const breed = animal?.breeds?.primary || "";
@@ -23,6 +30,26 @@ export default function PetCard({ animal, to, backState, children }) {
       <div className={styles.thumb} aria-label="No photo available" />
     );
 
+  const StarBtn = () =>
+    typeof favorite === "boolean" && onToggleFavorite ? (
+      <button
+        type="button"
+        className={`${styles.starBtn} iconBtn ${
+          favorite ? styles.starActive : ""
+        }`}
+        aria-pressed={favorite}
+        aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
+        title={favorite ? "Remove from favorites" : "Add to favorites"}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onToggleFavorite();
+        }}
+      >
+        ★
+      </button>
+    ) : null;
+
   return (
     <li className={styles.card}>
       <div className={styles.thumbWrap}>
@@ -34,6 +61,7 @@ export default function PetCard({ animal, to, backState, children }) {
           <Thumb />
         )}
         {hasVideo && <span className={styles.badge}>Video</span>}
+        <StarBtn />
       </div>
 
       {to ? (

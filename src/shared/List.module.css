@@ -47,6 +47,27 @@
   padding: 4px 6px;
   border-radius: 6px;
   font-size: 12px;
+  z-index: 1;
+}
+
+.starBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  composes: iconBtn from global;
+
+  padding: 6px 8px !important;
+  border-radius: 999px !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: #fff !important;
+  border: 1px solid transparent !important;
+  font-size: 18px !important;
+  line-height: 1;
+}
+.starActive {
+  background: #fcd34d !important;
+  color: #111827 !important;
 }
 
 .title {

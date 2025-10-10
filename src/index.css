@@ -82,3 +82,25 @@ img {
   height: auto;
   border-radius: var(--radius);
 }
+
+button:not(.iconBtn) {
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  border: 1px solid var(--primary);
+  padding: 10px 18px; /* bigger spacing */
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.02s ease;
+}
+button:not(.iconBtn):hover {
+  filter: brightness(0.97);
+}
+button:not(.iconBtn):active {
+  transform: translateY(1px);
+}
+button:not(.iconBtn):disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

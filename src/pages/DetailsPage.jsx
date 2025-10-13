@@ -9,7 +9,7 @@ import { useRecentlyViewed } from "../features/recentlyViewed/useRecentlyViewed.
 export default function DetailsPage() {
   const { id } = useParams();
   const locationRouter = useLocation();
-  const backTo = locationRouter.state?.from || "/search";
+  const backTo = locationRouter.state?.from || "/";
   const numericId = Number.parseInt(id, 10);
 
   const [animal, setAnimal] = React.useState(null);

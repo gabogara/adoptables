@@ -1,66 +1,253 @@
 import React from "react";
-import PetCard from "../shared/PetCard.jsx";
-import list from "../shared/List.module.css";
+import { useSearchParams, Link } from "react-router-dom";
 import Loader from "../shared/Loader.jsx";
 import ErrorAlert from "../shared/ErrorAlert.jsx";
 import { searchAnimals } from "../shared/api/petfinder.js";
+import { isZip5 } from "../shared/utils.js";
+import PetCard from "../shared/PetCard.jsx";
+import list from "../shared/List.module.css";
+import form from "../shared/Form.module.css";
+import Pagination from "../shared/Pagination.jsx";
 import { useRecentlyViewed } from "../features/recentlyViewed/useRecentlyViewed.js";
+import { useFavoritesContext } from "../features/favorites/FavoritesContext.jsx";
+
+const TYPES = [
+  "dog",
+  "cat",
+  "rabbit",
+  "small-furry",
+  "bird",
+  "horse",
+  "scales-fins-other",
+  "barnyard",
+];
 
 export default function HomePage() {
+  const [type, setType] = React.useState("dog");
+  const [location, setLocation] = React.useState("");
+  const [limit, setLimit] = React.useState("12");
+  const [page, setPage] = React.useState(1);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [animals, setAnimals] = React.useState([]);
+  const [pagination, setPagination] = React.useState(null);
   const [status, setStatus] = React.useState("idle");
   const [error, setError] = React.useState("");
+  const [formError, setFormError] = React.useState("");
+
   const { recent, clearRecent } = useRecentlyViewed();
+  const { addFavorite, removeFavorite, isFavorite } = useFavoritesContext();
+
+  const buildParams = React.useCallback(
+    (overrides = {}) => {
+      const t = overrides.type ?? type;
+      const l = overrides.location ?? location;
+      const lim = overrides.limit ?? limit;
+      const p = overrides.page ?? page;
+
+      const params = {
+        type: t,
+        page: p,
+        limit: Number.parseInt(lim, 10) || 12,
+      };
+      const loc = String(l || "").trim();
+      if (loc) params.location = loc;
+      return params;
+    },
+    [type, location, limit, page]
+  );
+
+  function pushUrlParams(nextPage) {
+    const params = { type, limit, page: String(nextPage) };
+    const loc = location.trim();
+    if (loc) params.location = loc;
+    setSearchParams(params);
+  }
+
+  async function fetchAnimals(targetPage = page, overrides = {}) {
+    setStatus("loading");
+    setError("");
+    try {
+      const params = buildParams({ ...overrides, page: targetPage });
+      const data = await searchAnimals(params);
+      setAnimals(Array.isArray(data?.animals) ? data.animals : []);
+      setPagination(data?.pagination || null);
+      setStatus("ready");
+    } catch (e) {
+      console.error(e);
+      setError(
+        "Couldn't fetch results. Check your Petfinder credentials in .env.local."
+      );
+      setStatus("error");
+    }
+  }
 
   React.useEffect(() => {
-    let mounted = true;
-    async function load() {
-      setStatus("loading");
-      setError("");
-      try {
-        // Simple first search: dogs near San Francisco (94103)
-        const data = await searchAnimals({
-          type: "dog",
-          location: "94103",
-          limit: 12,
-          page: 1,
-        });
-        if (!mounted) return;
-        setAnimals(Array.isArray(data?.animals) ? data.animals : []);
-        setStatus("ready");
-      } catch (e) {
-        if (!mounted) return;
-        console.error(e);
-        setError(
-          "Couldn't load the initial list. Check your Petfinder credentials in .env.local."
-        );
-        setStatus("error");
-      }
+    const t = searchParams.get("type");
+    const loc = searchParams.get("location") || "";
+    const lim = searchParams.get("limit") || "12";
+    const pg = Number.parseInt(searchParams.get("page") || "1", 10) || 1;
+
+    if (t || loc || searchParams.get("page") || searchParams.get("limit")) {
+      setType(t || "dog");
+      setLocation(loc);
+      setLimit(lim);
+      setPage(pg);
+      fetchAnimals(pg, { type: t || "dog", location: loc, limit: lim });
+    } else {
+      // Default initial feed (e.g., dogs near 94103)
+      setType("dog");
+      setLocation("94103");
+      setLimit("12");
+      setPage(1);
+      pushUrlParams(1);
+      fetchAnimals(1, { type: "dog", location: "94103", limit: "12" });
     }
-    load();
-    return () => {
-      mounted = false;
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!type) {
+      setFormError("Please select a type.");
+      return;
+    }
+    if (location.trim() && !isZip5(location)) {
+      setFormError(
+        "Please enter a valid 5-digit ZIP code (or leave it blank)."
+      );
+      return;
+    }
+    setFormError("");
+    setPage(1);
+    pushUrlParams(1);
+    fetchAnimals(1);
+  }
+
+  function handlePrev() {
+    if (!pagination) return;
+    const next = Math.max(1, (pagination.current_page || page) - 1);
+    setPage(next);
+    pushUrlParams(next);
+    fetchAnimals(next);
+  }
+  function handleNext() {
+    if (!pagination) return;
+    const total = pagination.total_pages || 1;
+    const next = Math.min(total, (pagination.current_page || page) + 1);
+    setPage(next);
+    pushUrlParams(next);
+    fetchAnimals(next);
+  }
 
   return (
     <>
       <h1>Adoptables</h1>
-      <p>Find pets by type and location.</p>
+      <p>Find adoptable pets by type and location.</p>
 
-      {status === "loading" && <Loader text="Loading pets..." />}
+      {/* Horizontal search form */}
+      <form onSubmit={handleSubmit} className={`${form.form} ${form.row}`}>
+        <div className={form.group}>
+          <label htmlFor="type" className={form.label}>
+            Type
+          </label>
+          <select
+            id="type"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            required
+            className={form.select}
+          >
+            {TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className={form.group}>
+          <label htmlFor="location" className={form.label}>
+            ZIP (optional)
+          </label>
+          <input
+            id="location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="e.g., 94103"
+            aria-invalid={
+              location.trim() && !isZip5(location) ? "true" : "false"
+            }
+            className={form.input}
+          />
+        </div>
+
+        <div className={form.group}>
+          <label htmlFor="limit" className={form.label}>
+            Results per page
+          </label>
+          <select
+            id="limit"
+            value={limit}
+            onChange={(e) => setLimit(e.target.value)}
+            className={form.select}
+          >
+            <option value="12">12</option>
+            <option value="24">24</option>
+            <option value="48">48</option>
+          </select>
+        </div>
+
+        <div className={form.actions}>
+          <button type="submit">Search</button>
+        </div>
+
+        {formError && (
+          <div role="alert" className={form.error}>
+            {formError}
+          </div>
+        )}
+      </form>
+
+      {status === "loading" && <Loader text="Loading results..." />}
       {status === "error" && <ErrorAlert message={error} />}
 
-      {status === "ready" && animals.length === 0 && <p>No results.</p>}
+      {status === "ready" && animals.length === 0 && (
+        <p>No results found. Try a different type or ZIP.</p>
+      )}
 
       {status === "ready" && animals.length > 0 && (
         <>
-          <h3>Featured near 94103</h3>
+          <p>
+            Showing page <strong>{pagination?.current_page || page}</strong> of{" "}
+            <strong>{pagination?.total_pages || "?"}</strong>
+          </p>
+
           <ul className={list.list}>
-            {animals.map((a) => (
-              <PetCard key={a.id} animal={a} to={`/details/${a.id}`} />
-            ))}
+            {animals.map((a) => {
+              const fav = isFavorite(a.id);
+              return (
+                <PetCard
+                  key={a.id}
+                  animal={a}
+                  to={`/details/${a.id}`}
+                  backState={{ from: `/?${searchParams.toString()}` }}
+                  favorite={fav}
+                  onToggleFavorite={() =>
+                    fav ? removeFavorite(a.id) : addFavorite(a)
+                  }
+                />
+              );
+            })}
           </ul>
+
+          <Pagination
+            current={pagination?.current_page || page}
+            total={pagination?.total_pages || 1}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
         </>
       )}
 
@@ -81,8 +268,17 @@ export default function HomePage() {
                 contact: { address: { city: r.city, state: r.state } },
                 breeds: { primary: "" },
               };
+              const fav = isFavorite(r.id);
               return (
-                <PetCard key={r.id} animal={shaped} to={`/details/${r.id}`} />
+                <PetCard
+                  key={r.id}
+                  animal={shaped}
+                  to={`/details/${r.id}`}
+                  favorite={fav}
+                  onToggleFavorite={() =>
+                    fav ? removeFavorite(r.id) : addFavorite(shaped)
+                  }
+                />
               );
             })}
           </ul>

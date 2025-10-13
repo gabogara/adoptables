@@ -1,0 +1,37 @@
+.form {
+  background: var(--surface);
+  padding: 12px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  display: grid;
+  gap: 10px 14px;
+}
+
+.row {
+  grid-template-columns: repeat(3, minmax(180px, 260px)) auto;
+  align-items: end;
+}
+
+.group {
+  margin-bottom: 0;
+}
+.label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+.input,
+.select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: #fff;
+}
+.actions {
+  align-self: end;
+}
+.error {
+  color: var(--danger, #b91c1c);
+}

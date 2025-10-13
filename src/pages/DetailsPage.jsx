@@ -131,18 +131,22 @@ export default function DetailsPage() {
         )}
       </ul>
       {!favorite ? (
-        <button onClick={() => addFavorite(animal)} style={{ marginRight: 8 }}>
-          Add to Favorites
-        </button>
+        <div className="btnRow mb-12">
+          <button onClick={() => addFavorite(animal)}>Add to Favorites</button>
+          <Link to={backTo} className="btnLike">
+            Back to Search
+          </Link>
+        </div>
       ) : (
-        <button
-          onClick={() => removeFavorite(animal.id)}
-          style={{ marginRight: 8 }}
-        >
-          Remove from Favorites
-        </button>
+        <div className="btnRow mb-12">
+          <button onClick={() => removeFavorite(animal.id)}>
+            Remove from Favorites
+          </button>
+          <Link to={backTo} className="btnLike">
+            Back to Search
+          </Link>
+        </div>
       )}
-      <Link to={backTo}>Back to Search</Link>
     </>
   );
 }

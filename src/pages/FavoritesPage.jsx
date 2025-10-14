@@ -1,5 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import PetCard from "../shared/PetCard.jsx";
+import list from "../shared/List.module.css";
 import { useFavoritesContext } from "../features/favorites/FavoritesContext.jsx";
 import Modal from "../shared/Modal.jsx";
 
@@ -25,19 +26,11 @@ export default function FavoritesPage() {
     setEditingId(null);
     setNoteDraft("");
   }
-  function askDelete(id) {
-    setConfirmId(id);
-  }
-  function confirmDelete() {
-    if (confirmId != null) {
-      removeFavorite(confirmId);
-      setConfirmId(null);
-    }
-  }
 
   return (
     <>
       <h2>Favorites</h2>
+
       {favorites.length === 0 ? (
         <p>No favorites yet. Add some from any Details page.</p>
       ) : (
@@ -45,51 +38,88 @@ export default function FavoritesPage() {
           <p>
             Total: <strong>{favorites.length}</strong>
           </p>
-          <ul>
-            {favorites.map((f) => (
-              <li key={f.id} style={{ marginBottom: 12 }}>
-                <Link to={`/details/${f.id}`}>
-                  <strong>{f.name}</strong>
-                </Link>{" "}
-                — {f.type}
-                {f.breeds ? ` • ${f.breeds}` : ""}{" "}
-                {f.contact?.city ? ` • ${f.contact.city}` : ""}
-                {f.contact?.state ? `, ${f.contact.state}` : ""}
-                <div style={{ marginTop: 6 }}>
-                  {editingId === f.id ? (
-                    <>
+
+          <ul className={list.list}>
+            {favorites.map((f) => {
+              const shaped = {
+                id: f.id,
+                name: f.name,
+                type: f.type,
+                photos:
+                  Array.isArray(f.photos) && f.photos.length
+                    ? f.photos
+                    : f.photo
+                    ? [{ small: f.photo, medium: f.photo }]
+                    : [],
+                contact: {
+                  address: {
+                    city: f.contact?.city || f.contact?.address?.city || "",
+                    state: f.contact?.state || f.contact?.address?.state || "",
+                  },
+                },
+                breeds: { primary: f.breeds?.primary || f.breeds || "" },
+                videos: f.videos || [],
+              };
+
+              const isEditing = editingId === f.id;
+
+              return (
+                <PetCard
+                  key={f.id}
+                  animal={shaped}
+                  to={`/details/${f.id}`}
+                  favorite={true}
+                  onToggleFavorite={() => removeFavorite(f.id)}
+                >
+                  {isEditing ? (
+                    <div style={{ width: "100%" }}>
                       <label
                         htmlFor={`note-${f.id}`}
-                        style={{ display: "block" }}
+                        style={{
+                          display: "block",
+                          fontWeight: 600,
+                          marginBottom: 4,
+                        }}
                       >
                         Note
                       </label>
                       <textarea
                         id={`note-${f.id}`}
+                        rows={3}
                         value={noteDraft}
                         onChange={(e) => setNoteDraft(e.target.value)}
-                        rows={3}
-                        style={{ width: "100%", maxWidth: 420 }}
+                        style={{ width: "100%", maxWidth: 480 }}
                       />
-                      <div style={{ marginTop: 6, display: "flex", gap: 8 }}>
-                        <button onClick={saveEdit}>Save</button>
-                        <button onClick={cancelEdit}>Cancel</button>
+                      <div className="btnRow mt-12">
+                        <button type="button" onClick={saveEdit}>
+                          Save
+                        </button>
+                        <button type="button" onClick={cancelEdit}>
+                          Cancel
+                        </button>
                       </div>
-                    </>
+                    </div>
                   ) : (
-                    <>
-                      <p>
+                    <div style={{ width: "100%" }}>
+                      <p style={{ margin: 0 }}>
                         <em>{f.note ? f.note : "No note yet."}</em>
                       </p>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button onClick={() => startEdit(f)}>Edit note</button>
-                        <button onClick={() => askDelete(f.id)}>Remove</button>
+                      <div className="btnRow mt-12">
+                        <button type="button" onClick={() => startEdit(f)}>
+                          Edit note
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmId(f.id)}
+                        >
+                          Remove
+                        </button>
                       </div>
-                    </>
+                    </div>
                   )}
-                </div>
-              </li>
-            ))}
+                </PetCard>
+              );
+            })}
           </ul>
         </>
       )}
@@ -98,7 +128,10 @@ export default function FavoritesPage() {
         <Modal
           title="Remove favorite?"
           onClose={() => setConfirmId(null)}
-          onConfirm={confirmDelete}
+          onConfirm={() => {
+            removeFavorite(confirmId);
+            setConfirmId(null);
+          }}
         >
           <p>This action cannot be undone.</p>
         </Modal>

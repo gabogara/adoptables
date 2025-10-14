@@ -7,7 +7,7 @@ export default function Pagination({ current = 1, total = 1, onPrev, onNext }) {
   return (
     <div
       aria-label="Pagination"
-      style={{ display: "flex", gap: 8, alignItems: "center" }}
+      style={{ display: "flex", gap: 15, alignItems: "center", marginTop: 15 }}
     >
       <button
         type="button"

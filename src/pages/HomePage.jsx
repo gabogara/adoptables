@@ -282,9 +282,11 @@ export default function HomePage() {
               );
             })}
           </ul>
-          <button type="button" onClick={clearRecent}>
-            Clear
-          </button>
+          <div className="btnRow mt-16">
+            <button type="button" onClick={clearRecent}>
+              Clear
+            </button>
+          </div>
         </>
       )}
     </>

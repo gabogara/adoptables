@@ -115,6 +115,9 @@ button:not(.iconBtn):disabled {
 .mt-12 {
   margin-top: 12px;
 }
+.mt-16 {
+  margin-top: 16px;
+}
 .mb-12 {
   margin-bottom: 12px;
 }

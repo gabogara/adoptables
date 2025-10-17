@@ -21,6 +21,7 @@ export default function DetailsPage() {
 
   React.useEffect(() => {
     let mounted = true;
+
     async function load() {
       setStatus("loading");
       setError("");
@@ -40,11 +41,13 @@ export default function DetailsPage() {
         setStatus("error");
       }
     }
+
     if (Number.isFinite(numericId)) load();
     else {
       setError("Invalid id.");
       setStatus("error");
     }
+
     return () => {
       mounted = false;
     };
@@ -64,9 +67,11 @@ export default function DetailsPage() {
       <>
         <h2>Details</h2>
         <ErrorAlert message={error} />
-        <p>
-          <Link to={backTo}>Back to Search</Link>
-        </p>{" "}
+        <div className="btnRow mt-12">
+          <Link to={backTo} className="btn">
+            Back to Search
+          </Link>
+        </div>
       </>
     );
   }
@@ -76,35 +81,46 @@ export default function DetailsPage() {
       <>
         <h2>Details</h2>
         <p>No details found.</p>
-        <p>
-          <Link to={backTo}>Back to Search</Link>
-        </p>{" "}
+        <div className="btnRow mt-12">
+          <Link to={backTo} className="btn">
+            Back to Search
+          </Link>
+        </div>
       </>
     );
   }
 
   const photo =
     animal.photos?.[0]?.medium || animal.primary_photo_cropped?.medium || "";
+
   const location = [
     animal.contact?.address?.city || "",
     animal.contact?.address?.state || "",
   ]
     .filter(Boolean)
     .join(", ");
+
   const favorite = isFavorite(animal.id);
 
   return (
     <>
       <h2>{animal.name || "Unnamed"}</h2>
+
       {photo ? (
         <img
           src={photo}
           alt={`${animal.name || "Pet"} photo`}
-          style={{ maxWidth: 320, display: "block", marginBottom: 12 }}
+          style={{
+            maxWidth: 320,
+            display: "block",
+            marginBottom: 12,
+            borderRadius: 12,
+          }}
         />
       ) : (
         <p>No photo available.</p>
       )}
+
       <ul>
         <li>
           <strong>Type:</strong> {animal.type}
@@ -130,23 +146,22 @@ export default function DetailsPage() {
           </li>
         )}
       </ul>
-      {!favorite ? (
-        <div className="btnRow mb-12">
-          <button onClick={() => addFavorite(animal)}>Add to Favorites</button>
-          <Link to={backTo} className="btnLike">
-            Back to Search
-          </Link>
-        </div>
-      ) : (
-        <div className="btnRow mb-12">
-          <button onClick={() => removeFavorite(animal.id)}>
+
+      <div className="btnRow mt-12">
+        {!favorite ? (
+          <button className="btn" onClick={() => addFavorite(animal)}>
+            Add to Favorites
+          </button>
+        ) : (
+          <button className="btn" onClick={() => removeFavorite(animal.id)}>
             Remove from Favorites
           </button>
-          <Link to={backTo} className="btnLike">
-            Back to Search
-          </Link>
-        </div>
-      )}
+        )}
+
+        <Link to={backTo} className="btn">
+          Back to Search
+        </Link>
+      </div>
     </>
   );
 }

@@ -27,6 +27,7 @@
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   --pad: 16px;
   --max-w: 1000px;
+
   --font-heading: "Baloo 2", system-ui, -apple-system, Segoe UI, Roboto,
     sans-serif;
 }
@@ -63,6 +64,7 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
 a:focus,
 button:focus,
 select:focus,
@@ -88,7 +90,7 @@ button:not(.iconBtn) {
   background: var(--primary);
   color: var(--primary-contrast);
   border: 1px solid var(--primary);
-  padding: 10px 18px; /* bigger spacing */
+  padding: 10px 18px;
   font-weight: 600;
   box-shadow: var(--shadow);
   cursor: pointer;
@@ -105,13 +107,51 @@ button:not(.iconBtn):disabled {
   cursor: not-allowed;
 }
 
+.iconBtn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  line-height: 1;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  height: 44px;
+  padding: 0 20px;
+  min-width: 180px;
+
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  border: 1px solid var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.02s ease;
+}
+.btn:hover {
+  filter: brightness(0.97);
+  text-decoration: none;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn[disabled] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .btnRow {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   align-items: center;
 }
-
 .mt-12 {
   margin-top: 12px;
 }
@@ -120,17 +160,4 @@ button:not(.iconBtn):disabled {
 }
 .mb-12 {
   margin-bottom: 12px;
-}
-
-.btnLike {
-  display: inline-block;
-  border-radius: 999px;
-  background: var(--primary);
-  color: var(--primary-contrast);
-  padding: 10px 18px;
-  text-decoration: none;
-}
-.btnLike:hover {
-  filter: brightness(0.97);
-  text-decoration: none;
 }
